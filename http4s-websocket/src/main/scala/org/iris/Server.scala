@@ -14,7 +14,7 @@ object Server {
     EmberServerBuilder.default[F]
       .withHost(host)
       .withPort(port)
-      .withHttpApp(new Routes[F]().service)
+      .withHttpWebSocketApp(wsb => new Routes[F]().service(wsb))
       .build
       .useForever
       .void
