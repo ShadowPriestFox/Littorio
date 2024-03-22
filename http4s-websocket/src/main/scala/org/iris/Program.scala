@@ -7,6 +7,7 @@ import cats.effect.std.Queue
 import org.http4s.websocket.WebSocketFrame
 import fs2.concurrent.Topic
 import fs2.Stream 
+import concurrent.duration.DurationInt
 
 object  Program extends IOApp.Simple{
   override def run: IO[Unit] = for {
@@ -14,6 +15,7 @@ object  Program extends IOApp.Simple{
     t <- Topic[IO, WebSocketFrame]
     s <- Stream(
       Stream.fromQueueUnterminated(q).through(t.publish),
+      Stream.awakeEvery[IO](30.seconds).map(_ => WebSocketFrame.Ping()).through(t.publish),
       Stream.eval(server[IO](q,t))
     ).parJoinUnbounded.compile.drain
   } yield s
