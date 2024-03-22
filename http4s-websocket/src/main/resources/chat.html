@@ -22,5 +22,27 @@
     </form>
     </div>
   </div> 
+  <script>
+    const output = document.getElementById("output")
+    const form = document.getElementById("chatform")
+    output.append("Send a message to get started \n");
+    const socket = new WebSocket("ws://localhost:8080/ws")
+    socket.onmessage = ev => {
+      output.append(event.data + '\n')
+    }
+    socket.onclose = ev => {
+      output.append("[closed] server connection ended");
+    }
+    socket.onerror = er => {
+      output.append("[Error] An error occured while processing data")
+      console.log("[error]" + er.data)
+    }
+    form.addEventListener('submit', ev =>{
+      ev.preventDefault()
+      const message = document.getElementById('entry').value
+      socket.send(message)
+      document.getElementById('entry').value = ''
+    })
+  </script>
 </body>
 </html>
