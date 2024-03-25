@@ -20,7 +20,25 @@ trait Protocol[F[_]]:
 object Protocol:
   def make[F[_]: Monad](chatState: Ref[F, ChatState]): Protocol[F] = 
     new Protocol[F]:
-      private def broadcastMessage[F[_]: Applicative](cs: ChatState, room: Room, om: OutputMessage): F[List[OutputMessage]] = ???
+      private def broadcastMessage[F[_]: Applicative](cs: ChatState, room: Room, om: OutputMessage): F[List[OutputMessage]] = 
+        cs.roomMembers.getOrElse(room, Set.empty[User]).map{u =>
+            om match
+              case SendToUser(user, msg) => SendToUser(u, msg)
+              case ChatMsg(from, to, msg) => ChatMsg(from, u, msg)
+              case _ => DiscardMessage
+          }.toList.pure[F]
+      private def removeFromCurrentRoom(stateRef: Ref[F, ChatState], user: User): F[List[OutputMessage]] = ???
+      
+      private def addToRoom[F[_]: Monad](stateRef: Ref[F, ChatState], user: User, room: Room): F[List[OutputMessage]] = 
+        stateRef.updateAndGet{cs =>
+          val updateMemberList = cs.roomMembers.getOrElse(room, Set()) + user
+          ChatState(
+            cs.userRooms + (user -> room),
+            cs.roomMembers + (room -> updateMemberList)
+          )
+          }.flatMap{
+            broadcastMessage(_ , room, SendToUser(user,s"${user.name} has joined the ${room.room} room"))
+          }
       override def help(user: User): F[OutputMessage] = 
         val text = """Commands:
         | /help                 - Show this  text
@@ -31,7 +49,18 @@ object Protocol:
         """.stripMargin
         SendToUser(user, text).pure[F]
 
-      override def enterRoom(user: User, room: Room): F[List[OutputMessage]] = ???
+      override def enterRoom(user: User, room: Room): F[List[OutputMessage]] = chatState.get.flatMap{cs =>
+        cs.userRooms.get(user).fold(addToRoom(chatState,user,room))(r => 
+          if (r == room) then
+            List(SendToUser(user, s"You are already in the ${room.room} room")).pure[F]
+          else
+            val leaveMessage = removeFromCurrentRoom(chatState, user)
+            val enterMessage = addToRoom(chatState, user, room)
+            for leave <- leaveMessage
+              enter <- enterMessage
+            yield leave ++ enter
+          )
+        }
 
       override def disconnect(userRef: Ref[F, Option[User]]): F[List[OutputMessage]] = ???
 
@@ -55,7 +84,12 @@ object Protocol:
 
       override def isUsernameInUse(name: String): F[Boolean] = chatState.get.map(cs => cs.userRooms.keySet.exists(_.name == name))
 
-      override def chat(user: User, text: String): F[List[OutputMessage]] = ???
+      override def chat(user: User, text: String): F[List[OutputMessage]] = 
+        for cs <- chatState.get
+          output <- cs.userRooms.get(user) match
+            case None => List(SendToUser(user, "You are not currently in a room")).pure[F]
+            case Some(value) => broadcastMessage(cs,value, ChatMsg(user, user/* this user will be replace in broad cast so here is just a holder*/, text))
+        yield output
 
       override def register(name: String): F[OutputMessage] = 
         (User(name) match
