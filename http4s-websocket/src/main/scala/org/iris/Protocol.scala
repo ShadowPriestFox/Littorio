@@ -5,6 +5,7 @@ import cats.effect.kernel.Ref
 import cats.data.Validated.Valid
 import cats.data.Validated.Invalid
 import cats.implicits._
+import cats.Applicative
 
 trait Protocol[F[_]]:
   def register(name: String): F[OutputMessage]
@@ -19,7 +20,7 @@ trait Protocol[F[_]]:
 object Protocol:
   def make[F[_]: Monad](chatState: Ref[F, ChatState]): Protocol[F] = 
     new Protocol[F]:
-
+      private def broadcastMessage[F[_]: Applicative](cs: ChatState, room: Room, om: OutputMessage): F[List[OutputMessage]] = ???
       override def help(user: User): F[OutputMessage] = 
         val text = """Commands:
         | /help                 - Show this  text
