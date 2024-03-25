@@ -20,3 +20,13 @@ case class UnsupportedCommand(
   user: Option[User],
   msg: String = "Unsupported command"
 ) extends OutputMessage
+
+case object KeepAlive extends OutputMessage
+
+case object DiscardMessage extends  OutputMessage
+
+case class SendToUser(user: User, msg: String) extends OutputMessage:
+  def forUser(targetUser: User): Boolean = targetUser == user
+
+case class ChatMsg(from: User,to: User,msg: String)extends OutputMessage:
+  def forUser(targetUser: User): Boolean = targetUser == to
