@@ -27,7 +27,19 @@ object Protocol:
               case ChatMsg(from, to, msg) => ChatMsg(from, u, msg)
               case _ => DiscardMessage
           }.toList.pure[F]
-      private def removeFromCurrentRoom(stateRef: Ref[F, ChatState], user: User): F[List[OutputMessage]] = ???
+      private def removeFromCurrentRoom(stateRef: Ref[F, ChatState], user: User): F[List[OutputMessage]] = 
+        stateRef.get.flatMap{cs => 
+          cs.userRooms.get(user).fold(List.empty[OutputMessage].pure[F]){room =>
+            val updateMembers = cs.roomMembers.getOrElse(room, Set()) - user
+            stateRef.update(ccs => 
+              ChatState(ccs.userRooms - user, if (updateMembers.isEmpty) then 
+                  ccs.roomMembers - room
+                else
+                  ccs.roomMembers + (room -> updateMembers)
+                )
+              ).flatMap(_ => broadcastMessage(cs,room, SendToUser(user, s"${user.name} has left the ${room.room} room")))
+            }
+          }
       
       private def addToRoom[F[_]: Monad](stateRef: Ref[F, ChatState], user: User, room: Room): F[List[OutputMessage]] = 
         stateRef.updateAndGet{cs =>
@@ -62,7 +74,11 @@ object Protocol:
           )
         }
 
-      override def disconnect(userRef: Ref[F, Option[User]]): F[List[OutputMessage]] = ???
+      override def disconnect(userRef: Ref[F, Option[User]]): F[List[OutputMessage]] = 
+        userRef.get.flatMap{
+          case Some(value) => removeFromCurrentRoom(chatState, value)
+          case None => List.empty[OutputMessage].pure[F]
+        }
 
       override def listRooms(user: User): F[List[OutputMessage]] = 
         chatState.get.map{cs => 
