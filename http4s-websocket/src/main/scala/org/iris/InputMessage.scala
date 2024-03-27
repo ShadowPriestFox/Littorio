@@ -66,12 +66,10 @@ object InputMessage:
       override def parse(userRef: Ref[F, Option[User]], text: String): F[List[OutputMessage]] = 
         text.trim() match
           case "" => List(DiscardMessage).pure[F]
-          case txt => userRef.get.flatMap{u =>
-            u.fold{
-              ???
-            }{
-              ???
-            }
-            }
+          case txt => userRef.get.flatMap :u =>
+            u.fold(defaultRoom match
+                case Valid(a) => processText4UnReg(txt, protocol, userRef, a)
+                case Invalid(e) => List(ParsingError(u, e)).pure[F]):
+              user => processText4Reg(user, txt, protocol)
         
-      override def defaultRoom: Validated[String, Room] = ???
+      override def defaultRoom: Validated[String, Room] = Room("default")
