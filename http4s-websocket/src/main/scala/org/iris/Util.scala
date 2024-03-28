@@ -23,3 +23,8 @@ object Room{
 }
 
 case class ChatState(userRooms: Map[User, Room], roomMembers: Map[Room, Set[User]])
+
+
+case class AuthUser(id: Long, name: String)
+
+case class TokenPayLoad(user: String, level: String)

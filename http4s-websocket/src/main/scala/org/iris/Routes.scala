@@ -16,14 +16,23 @@ import cats.effect.std.Queue
 import fs2.concurrent.Topic
 import cats.effect.kernel.Ref
 import cats.implicits.*
+import dev.profunktor.auth.jwt.JwtToken
+
 import concurrent.duration.DurationInt
 import io.circe.generic.auto.*
 import io.circe.syntax.*
-import org.http4s.Media
+import io.circe.parser.*
 import org.http4s.MediaType
 import org.http4s.headers.`Content-Type`
+import pdi.jwt.JwtClaim
 
 class Routes[F[_]: Files: Temporal] extends Http4sDsl[F]:
+  val authenticate: JwtToken => JwtClaim => F[Option[AuthUser]] =
+    token => claim =>
+      decode[TokenPayLoad](claim.content) match
+        case Left(value)  => None.pure[F]
+        case Right(value) => ??? // find in db
+
   private def handleWebSocketStream(wsf: Stream[F, WebSocketFrame],
     im: InputMessage[F], 
     protocol: Protocol[F],
