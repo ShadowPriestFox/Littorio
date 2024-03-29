@@ -56,7 +56,7 @@ object InputMessage:
       List(Register(None)).pure[F]
   private def commandParser: Parser[TextCommand] =
     val leftSide = ((char('/').string) ~ alpha.rep.string).string
-    val rightSide: Parser[(Unit, String)] = sp ~ alpha.rep.string
+    val rightSide: Parser[(Unit, String)] = sp ~ Parser.anyChar.rep.string
     ((leftSide ~ rightSide.?) <* wsp.rep.?).map((left,right) => TextCommand(left, right.map((_, str) => str)))
   
   private def parseToCommand(value: String): Either[Parser.Error, TextCommand] = commandParser.parseAll(value)
