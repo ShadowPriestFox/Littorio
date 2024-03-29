@@ -77,8 +77,8 @@ class Routes[F[_]: Files: Temporal] extends Http4sDsl[F]:
     def uStream = 
       Stream.fromQueueUnterminated(uQueue)
         .filter:
-          case DiscardMessage => true
-          case _ => false
+          case DiscardMessage => false
+          case _ => true
         .map(processMsg)
     def mainStream = 
       t.subscribe(maxQueued = 1000)
