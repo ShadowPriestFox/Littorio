@@ -16,12 +16,12 @@
     border: solid purple 2px;;
     ">
     <br />
+    </div>
     <form action="" id="chatform">
       <input type="text" name="entry" id="entry"/>
       <button type="submit">Send</button>
     </form>
-    </div>
-  </div> 
+  </div>
   <script>
     const output = document.getElementById("output")
     const form = document.getElementById("chatform")
@@ -33,7 +33,7 @@
       return pre
     }
     output.append(colorText("Send a message to get started \n","purple"));
-    const socket = new WebSocket("ws://localhost:8088/ws")
+    const socket = new WebSocket(`ws://${window.location.host}/ws`)
     socket.onmessage = ev => {
       const obj = JSON.parse(ev.data)
       if (obj.Register){

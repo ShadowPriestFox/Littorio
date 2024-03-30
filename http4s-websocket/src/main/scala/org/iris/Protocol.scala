@@ -16,6 +16,7 @@ trait Protocol[F[_]]:
   def listRooms(user: User): F[List[OutputMessage]]
   def listMembers(user: User): F[List[OutputMessage]]
   def disconnect(userRef: Ref[F, Option[User]]): F[List[OutputMessage]]
+  def whisper(form: User,user: User, text: String): F[List[OutputMessage]]
 
 object Protocol:
   def make[F[_]: Monad](chatState: Ref[F, ChatState]): Protocol[F] = 
@@ -112,3 +113,10 @@ object Protocol:
           case Valid(a) => SuccessfulRegistration(a)
           case Invalid(e) => ParsingError(None, e.toString()))
         .pure[F]
+      override def whisper(from: User,user: User, text: String): F[List[OutputMessage]] = 
+        for cs <- chatState.get
+        yield 
+          if cs.userRooms.keySet.contains(user) then
+            List(SendToUser(from,s"You whisper to ${user.name}: $text"),SendToUser(user, s"${from.name} whisper you: $text"))
+          else
+            List(UnsupportedCommand(from.some,s"${user.name} not exist"))

@@ -17,10 +17,16 @@ trait InputMessage[F[_]]:
   def parse(userRef: Ref[F, Option[User]], text: String): F[List[OutputMessage]]
 
 object InputMessage:
+  private def whisperParser = (alpha.rep.string <* sp) ~ Parser.anyChar.rep.string
   private def processText4Reg[F[_]: Applicative](user: User, text: String, protocol: Protocol[F]): F[List[OutputMessage]] =
     if text.charAt(0) == '/' then
       parseToCommand(text).fold(_ => List(ParsingError(None,"Character after '/' must be between A-Z or a-z")).pure[F], 
         {
+          case TextCommand("/whisper", Some(partial)) => whisperParser.parseAll(partial) match
+            case Left(value) => List(ParsingError(Some(user), "You whisper syntax is wrong")).pure[F]
+            case Right((targetUser, content)) => 
+              val target = new User(targetUser)
+              protocol.whisper(user, target, content)
           case TextCommand("/name", Some(n)) => List(ParsingError(Some(user), "You can't register again")).pure[F]
           case TextCommand("/room", Some(r)) => Room(r) match
             case Valid(a) => protocol.enterRoom(user,a)
@@ -56,7 +62,7 @@ object InputMessage:
       List(Register(None)).pure[F]
   private def commandParser: Parser[TextCommand] =
     val leftSide = ((char('/').string) ~ alpha.rep.string).string
-    val rightSide: Parser[(Unit, String)] = sp ~ alpha.rep.string
+    val rightSide: Parser[(Unit, String)] = sp ~ Parser.anyChar.rep.string
     ((leftSide ~ rightSide.?) <* wsp.rep.?).map((left,right) => TextCommand(left, right.map((_, str) => str)))
   
   private def parseToCommand(value: String): Either[Parser.Error, TextCommand] = commandParser.parseAll(value)
