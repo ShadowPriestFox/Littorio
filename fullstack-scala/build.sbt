@@ -3,12 +3,12 @@ ThisBuild / version := "1.0.0"
 lazy val iris    = "org.iris"
 lazy val scala3Version = "3.3.1"
 
-// lazy val core = (crossProject(JSPlatform, JVMPlatform) in file("common"))
-//   .settings(
-//     name         := "common",
-//     scalaVersion := scala3Version,
-//     organization := iris
-//   )
+lazy val core = (crossProject(JSPlatform, JVMPlatform) in file("common"))
+  .settings(
+    name         := "common",
+    scalaVersion := scala3Version,
+    organization := iris
+  )
 
 lazy val tyrianVersion = "0.6.1"
 lazy val fs2DomVersion = "0.1.0"
@@ -31,7 +31,7 @@ lazy val app = (project in file("app"))
     semanticdbEnabled := true,
     autoAPIMappings   := true
   )
-  // .dependsOn(core.js)
+  .dependsOn(core.js)
 
 lazy val catsEffectVersion          = "3.3.14"
 lazy val http4sVersion              = "0.23.15"
@@ -57,4 +57,4 @@ lazy val server = (project in file("server"))
       "org.slf4j"              % "slf4j-simple"        % slf4jVersion,
     ),
   )
-  // .dependsOn(core.jvm)
+  .dependsOn(core.jvm)
