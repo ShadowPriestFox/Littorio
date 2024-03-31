@@ -56,5 +56,15 @@ lazy val server = (project in file("server"))
       "org.tpolecat"          %% "doobie-postgres"     % doobieVersion,
       "org.slf4j"              % "slf4j-simple"        % slf4jVersion,
     ),
+    Compile / run / mainClass := Some("org.iris.Application")
   )
   .dependsOn(core.jvm)
+
+lazy val root = (project in file("."))
+  .aggregate(server)
+  .settings(
+    addCommandAlias("run","server/run"),
+    name:= "fullstack-scala3",
+    scalaVersion := scala3Version,
+    organization := iris,
+  )
