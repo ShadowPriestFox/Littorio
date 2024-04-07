@@ -13,7 +13,7 @@ val jwtCirce = "com.github.jwt-scala" %% "jwt-circe" % JwtScalaVersion
 
 lazy val root = (project in file("."))
   .settings(
-    organization := "rockthejvm",
+    organization := "org.iris",
     name := "websockets",
     version := "0.0.1-SNAPSHOT",
     scalaVersion := "3.3.0",
