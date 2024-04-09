@@ -1,7 +1,8 @@
 import io.circe.* 
 import io.circe.generic.semiauto
 import cats.implicits.*
-import scala.compiletime.summonInline
+import scala.compiletime.*
+import scala.deriving.Mirror
 
 case class Phone(number: String, prefix: Int)
 case class Email(primary: String, secondary: Option[String])
@@ -47,3 +48,23 @@ val encoder = Encoder.instance[User]: value =>
   val fields = Tuple.fromProductTyped(value)
   val jsons = tupleToJson(fields)
   concatObjects(jsons)
+
+val mirror = summon[Mirror.Of[User]]
+
+type MirrorElemTypes = (Email, Phone, Address)
+
+inline def size[T <: Tuple]: Int = 
+  inline erasedValue[T] match
+    case EmptyTuple => 0
+    case _: (h *: t) => 1 + size[t]
+
+def combineDecoders[H, T <: Tuple](dh: Decoder[H], dt: Decoder[T]): Decoder[H *: T] = 
+  dh.product(dt).map(_ *: _)
+
+trait Is[A]
+inline def decodeTuple[T <: Tuple]: Decoder[T] = 
+  inline erasedValue[Is[T]] match
+    case _: Is[EmptyTuple] => Decoder.const(EmptyTuple)
+    case _: Is[h *: t] => 
+      val decoder = summonInline[Decoder[h]]
+      combineDecoders(decoder, decodeTuple[t])
