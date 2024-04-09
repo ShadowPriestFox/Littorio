@@ -68,3 +68,13 @@ inline def decodeTuple[T <: Tuple]: Decoder[T] =
     case _: Is[h *: t] => 
       val decoder = summonInline[Decoder[h]]
       combineDecoders(decoder, decodeTuple[t])
+
+
+val codec: Codec[User] = 
+  val encoder = Encoder.instance[User]: value =>
+    val fields = Tuple.fromProductTyped(value)
+    val jsons = tupleToJson(fields)
+    concatObjects(jsons)
+  val mirror = summon[Mirror.Of[User]]
+  val decoder = decodeTuple[mirror.MirroredElemTypes].map(mirror.fromTuple)
+  Codec.from(decoder, encoder)
