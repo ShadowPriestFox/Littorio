@@ -3,3 +3,4 @@ target/
 metals.sbt
 .bsp/
 .idea
+.scala-build/
