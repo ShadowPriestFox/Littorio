@@ -3,6 +3,7 @@ import io.circe.generic.semiauto
 import cats.implicits.*
 import scala.compiletime.*
 import scala.deriving.Mirror
+import scala.Product
 
 case class Phone(number: String, prefix: Int)
 case class Email(primary: String, secondary: Option[String])
@@ -76,5 +77,13 @@ val codec: Codec[User] =
     val jsons = tupleToJson(fields)
     concatObjects(jsons)
   val mirror = summon[Mirror.Of[User]]
+  val decoder = decodeTuple[mirror.MirroredElemTypes].map(mirror.fromTuple)
+  Codec.from(decoder, encoder)
+
+inline def makeCodec[A <: Product](using mirror: Mirror.ProductOf[A]): Codec[A] = 
+  val encoder = Encoder.instance[A]: value =>
+    val fields = Tuple.fromProductTyped(value)
+    val jsons = tupleToJson(fields)
+    concatObjects(jsons)
   val decoder = decodeTuple[mirror.MirroredElemTypes].map(mirror.fromTuple)
   Codec.from(decoder, encoder)
