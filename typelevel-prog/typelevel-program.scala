@@ -87,3 +87,17 @@ inline def makeCodec[A <: Product](using mirror: Mirror.ProductOf[A]): Codec[A] 
     concatObjects(jsons)
   val decoder = decodeTuple[mirror.MirroredElemTypes].map(mirror.fromTuple)
   Codec.from(decoder, encoder)
+
+type Map[T <: Tuple, F[_]] <: Tuple = 
+  T match
+    case EmptyTuple => EmptyTuple
+    case h *: t => F[h] *: Map[t, F]
+
+
+case class IsDecodeMap[T <: Tuple](value: Map[T, Decoder])
+
+inline def decodeMapTuple[T <: Tuple](decoders: Map[T, Decoder]): Decoder[T] = 
+  inline IsDecodeMap(decoders) match
+    case _:IsDecodeMap[EmptyTuple] => Decoder.const(EmptyTuple)
+    case ds: IsDecodeMap[h *: t] => combineDecoders(ds.value.head, decodeMapTuple(ds.value.tail))
+  
