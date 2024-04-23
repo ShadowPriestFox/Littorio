@@ -33,7 +33,8 @@ object MainzServer:
     yield (config,s)).use[Unit]:
       case (config,s) => 
         for
-          _ <- logger.info("hello")
+          _ <- logger.info(s"server started: $config")
+          _ <- Async[F].never
         yield ()
 
   //   for {
