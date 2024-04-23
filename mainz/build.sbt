@@ -9,7 +9,7 @@ lazy val root = (project in file("."))
     organization := "org.iris",
     name := "mainz",
     version := "0.0.1-SNAPSHOT",
-    scalaVersion := "3.3.0",
+    scalaVersion := "3.3.3",
     libraryDependencies ++= Seq(
       "org.http4s"      %% "http4s-ember-server" % Http4sVersion,
       "org.http4s"      %% "http4s-ember-client" % Http4sVersion,
@@ -18,6 +18,7 @@ lazy val root = (project in file("."))
       "org.scalameta"   %% "munit"               % MunitVersion           % Test,
       "org.typelevel"   %% "munit-cats-effect-3" % MunitCatsEffectVersion % Test,
       "ch.qos.logback"  %  "logback-classic"     % LogbackVersion,
+      "com.github.pureconfig" %% "pureconfig-core" % "0.17.6",
     ),
     assembly / assemblyMergeStrategy := {
       case "module-info.class" => MergeStrategy.discard
