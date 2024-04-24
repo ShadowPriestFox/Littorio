@@ -3,7 +3,7 @@ val CirceVersion = "0.14.6"
 val MunitVersion = "0.7.29"
 val LogbackVersion = "1.4.14"
 val MunitCatsEffectVersion = "1.0.7"
-
+Compile / run / fork := true
 lazy val root = (project in file("."))
   .settings(
     organization := "org.iris",

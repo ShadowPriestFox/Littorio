@@ -4,3 +4,4 @@ metals.sbt
 .bsp/
 .idea
 .scala-build/
+.env

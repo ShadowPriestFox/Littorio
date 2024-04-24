@@ -36,29 +36,3 @@ object MainzServer:
           _ <- logger.info(s"server started: $config")
           _ <- Async[F].never
         yield ()
-
-  //   for {
-  //     client <- EmberClientBuilder.default[F].build
-  //     helloWorldAlg = HelloWorld.impl[F]
-  //     jokeAlg = Jokes.impl[F](client)
-
-  //     // Combine Service Routes into an HttpApp.
-  //     // Can also be done via a Router if you
-  //     // want to extract segments not checked
-  //     // in the underlying routes.
-  //     httpApp = (
-  //       MainzRoutes.helloWorldRoutes[F](helloWorldAlg) <+>
-  //       MainzRoutes.jokeRoutes[F](jokeAlg)
-  //     ).orNotFound
-
-  //     // With Middlewares in place
-  //     finalHttpApp = Logger.httpApp(true, true)(httpApp)
-
-  //     _ <- 
-  //       EmberServerBuilder.default[F]
-  //         .withHost(ipv4"0.0.0.0")
-  //         .withPort(port"8080")
-  //         .withHttpApp(finalHttpApp)
-  //         .build
-  //   } yield ()
-  // }.useForever
