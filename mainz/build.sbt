@@ -4,6 +4,7 @@ val MunitVersion = "0.7.29"
 val LogbackVersion = "1.4.14"
 val MunitCatsEffectVersion = "1.0.7"
 Compile / run / fork := true
+ThisBuild /scalacOptions += "-source:future"
 lazy val root = (project in file("."))
   .settings(
     organization := "org.iris",
@@ -21,6 +22,7 @@ lazy val root = (project in file("."))
       "com.github.pureconfig" %% "pureconfig-core" % "0.17.6",
       "org.tpolecat" %% "doobie-core" % "1.0.0-RC5",
       "org.tpolecat" %% "doobie-hikari" % "1.0.0-RC5",
+      "com.mysql" % "mysql-connector-j" % "8.3.0"
     ),
     assembly / assemblyMergeStrategy := {
       case "module-info.class" => MergeStrategy.discard
