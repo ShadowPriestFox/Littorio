@@ -9,6 +9,6 @@ trait CommandExecutorService[F[_]]:
   def execute(context: ExecuteContext,info: ProcessInstanceInfo,topicName: String): F[ExecutorResponse]
 
 object CommandExecutorService:
-  def make[F[_]: Async] = new CommandExecutorService[F] {
+  def make[F[_]: Async](taskService: TaskService[F]) = new CommandExecutorService[F] {
     override def execute(context: ExecuteContext, info: ProcessInstanceInfo, topicName: String): F[ExecutorResponse] = ???
   }
