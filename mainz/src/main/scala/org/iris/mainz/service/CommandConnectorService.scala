@@ -5,6 +5,7 @@ import doobie.util.transactor.Transactor
 import org.iris.mainz.domain.CommandConnector
 import doobie.*
 import doobie.implicits.*
+import org.iris.mainz.implicits.given 
 
 trait CommandConnectorService[F[_]]:
   def findCommandConnector(id: String): F[CommandConnector]

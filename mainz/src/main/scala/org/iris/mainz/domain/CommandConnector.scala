@@ -1,11 +1,6 @@
 package org.iris.mainz.domain
 
-import io.circe.{Codec, Json}
-import org.iris.mainz.implicits.*
-import doobie.*
+import io.circe.Json
 
-case class CommandConnector(id: String, command: String, parameters: Option[Json], dataField: Option[Json], variable: Option[Json]) derives Codec.AsObject
+case class CommandConnector(id: String, command: String, parameters: Option[Json], dataField: Option[Json], variable: Option[Json]) 
 
-object CommandConnector:
-  given Put[CommandConnector] = encoderPutT[CommandConnector]
-  given Get[CommandConnector] = decoderGetT[CommandConnector]
