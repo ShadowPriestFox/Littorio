@@ -6,6 +6,7 @@ import io.circe.generic.semiauto.*
 import org.http4s.EntityDecoder
 import cats.effect.Concurrent
 import org.http4s.circe.jsonOf
+import io.circe.literal.*
 
 final case class ExecuteContext(flowContext: Json, flowData: Map[String, Json])
     derives Codec.AsObject
@@ -13,3 +14,5 @@ final case class ExecuteContext(flowContext: Json, flowData: Map[String, Json])
 object ExecuteContext:
   given [F[_]: Concurrent]: EntityDecoder[F, ExecuteContext] =
     jsonOf[F, ExecuteContext]
+
+  def default: ExecuteContext = ExecuteContext(json"{}", Map.empty)
