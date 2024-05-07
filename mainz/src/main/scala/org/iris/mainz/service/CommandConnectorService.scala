@@ -13,6 +13,6 @@ trait CommandConnectorService[F[_]]:
 object CommandConnectorService:
   def make[F[_] : Async](xa: Transactor[F]): CommandConnectorService[F] = new CommandConnectorService[F]:
     override def findCommandConnector(id: String): F[CommandConnector] =
-      sql"select id,command,parameters,data_field,variable from command_connector where id = $id"
+      sql"select id,name,bp_id,command,parameters,data_field,variable from command_connector where id = $id"
         .query[CommandConnector]
         .unique.transact(xa)

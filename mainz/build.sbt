@@ -25,7 +25,9 @@ lazy val root = (project in file("."))
       "com.github.pureconfig" %% "pureconfig-core" % "0.17.6",
       "org.tpolecat" %% "doobie-core" % "1.0.0-RC5",
       "org.tpolecat" %% "doobie-hikari" % "1.0.0-RC5",
-      "com.mysql" % "mysql-connector-j" % "8.3.0"
+      "com.mysql" % "mysql-connector-j" % "8.3.0",
+      "org.apache.groovy" % "groovy-all" % "4.0.21",
+      "io.vavr" % "vavr" % "0.10.4"
     ),
     assembly / assemblyMergeStrategy := {
       case "module-info.class" => MergeStrategy.discard
