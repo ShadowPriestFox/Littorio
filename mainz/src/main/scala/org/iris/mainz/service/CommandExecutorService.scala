@@ -5,6 +5,8 @@ import cats.effect.Async
 import cats.implicits.*
 import io.circe.Json
 import io.circe.literal.*
+import io.circe.parser.*
+import io.circe.syntax.*
 
 import scala.jdk.CollectionConverters.*
 
@@ -34,17 +36,20 @@ object CommandExecutorService:
 
     private def exam(sample: ExecutionSample) = ???
 
-    private def decrypt(parameters: Map[String, String],parameterKeys: List[Json]): Map[String, String] =
+    private def decrypt(parameters: Map[String, String], parameterKeys: List[Json]): Map[String, String] =
       parameters.map:
-        case (k,v) =>
+        case (k, v) =>
           val pk = parameterKeys.find:
             pk =>
               pk.hcursor.downField("type").as[String].getOrElse("") == "Password" && pk.hcursor.downField("name").as[String].getOrElse("") == k
-          k -> pk.map(_ => v/* password decode*/).getOrElse(v)
+          k -> pk.map(_ => v /* password decode*/).getOrElse(v)
 
     private def preCommandExecute(sample: ExecutionSample): (String, Map[String, String]) =
+      val parameters = decrypt(sample.parameterInput.get, sample.parameterKeys.get)
       if sample.isCompose then
-        ???
+        val c = decode[Map[String,String]](sample.credential.get.toString).getOrElse(Map.empty)
+        val mergedParameters = parameters ++ c
+        (sample.asJson.toString, mergedParameters)
       else
         ???
 
