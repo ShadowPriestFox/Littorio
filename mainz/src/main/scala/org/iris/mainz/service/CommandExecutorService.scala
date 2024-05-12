@@ -1,9 +1,8 @@
 package org.iris.mainz.service
 
-import org.iris.mainz.domain.{ExecuteContext, ExecutorError, ExecutorResponse, ProcessInstanceInfo, Task}
+import org.iris.mainz.domain.{ExecuteContext, ExecutionSample, ExecutorError, ExecutorResponse, ProcessInstanceInfo, Task}
 import cats.effect.Async
 import cats.implicits.*
-import com.inossem.pgoplus.core.commandbase.{CommandParams, ParamType}
 import io.circe.Json
 import io.circe.literal.*
 
@@ -30,34 +29,23 @@ object CommandExecutorService:
         case (_, _, Some(id)) => ???
         case _                => ExecutorResponse(ExecuteContext.default, ExecutorError("PGoPlusException", "", "task do not have connector binding")).pure
 
-    private def executeCommand(id: String, credentialMap: Map[String, String])(contextProcessor: (ExecuteContext,List[String],List[String]) => Json)(using context: ExecuteContext, info: ProcessInstanceInfo, topicName: String): F[ExecutorResponse] =
-      for
-        command <- commandConnectorService.findCommandConnector(id)
-        script = command.command
-        processDefinitionId = info.processDefinitionId
-        data = context.flowData
-        cmd <- cmdFactory.createCommand(script, command.bp)
-        paramsKeys = cmd.getParamsKeys
-        optParams = command.parameters.flatMap: j =>
-          j.asObject.map: jo =>
-            jo.toMap.map:
-              case (key, value) => key -> paramsKeys.asScala.find(pk => pk.getName == key && pk.getType == ParamType.Password).fold(value.toString)(json => PasswordCodec.decrypt(json.toString))
-        parameters = optParams.getOrElse(Map.empty) ++ credentialMap
-        commandParams = CommandParams.create(parameters.asJava)
-        _ <- Async[F].delay(cmd.init(commandParams))
-        field = command.dataField.flatMap(_.as[List[String]].toOption).getOrElse(List.empty)
-        variable = command.variable.flatMap(_.as[List[String]].toOption).getOrElse(List.empty)
-        data = contextProcessor(context,field,variable)
-        content = if command.name == "NoticeCommand" then
-          json"""
-                {
-                  "instanceId":${info.instanceId},
-                  "syncData": $data,
-                  "pgoURL": ""
-                }
-              """.toString else
-          data.toString
-      yield ???
-  
+    private def executeCommand(id: String, credentialMap: Map[String, String])(contextProcessor: (ExecuteContext, List[String], List[String]) => Json)(using context: ExecuteContext, info: ProcessInstanceInfo, topicName: String): F[ExecutorResponse] =
+      ???
 
+    private def exam(sample: ExecutionSample) = ???
 
+    private def decrypt(parameters: Map[String, String],parameterKeys: List[Json]): Map[String, String] =
+      parameters.map:
+        case (k,v) =>
+          val pk = parameterKeys.find:
+            pk =>
+              pk.hcursor.downField("type").as[String].getOrElse("") == "Password" && pk.hcursor.downField("name").as[String].getOrElse("") == k
+          k -> pk.map(_ => v/* password decode*/).getOrElse(v)
+
+    private def preCommandExecute(sample: ExecutionSample): (String, Map[String, String]) =
+      if sample.isCompose then
+        ???
+      else
+        ???
+
+    private def preMappingExecute(sample: ExecutionSample): String = ???
