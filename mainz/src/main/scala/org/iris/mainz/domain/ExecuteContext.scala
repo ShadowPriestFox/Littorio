@@ -8,7 +8,7 @@ import cats.effect.Concurrent
 import org.http4s.circe.jsonOf
 import io.circe.literal.*
 
-final case class ExecuteContext(flowContext: Json, flowData: Map[String, Json])
+final case class ExecuteContext(context: Json, flowData: Map[String, Json])
     derives Codec.AsObject
 
 object ExecuteContext:
